@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기술연구소 업무 포털</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f3ef;
+  --surface:#ffffff;
+  --border:#e0ddd6;
+  --text-primary:#1a1a18;
+  --text-secondary:#6b6a66;
+  --text-muted:#a09f9b;
+  --accent:#1d4ed8;
+  --disabled-bg:#f0efeb;
+  --disabled-border:#d4d2cc;
+  --disabled-text:#b0aead;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-mark{width:28px;height:28px;background:var(--text-primary);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:16px;height:16px;fill:none;stroke:white;stroke-width:1.5}
+.site-name{font-size:14px;font-weight:500;letter-spacing:-0.01em}
+.header-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+
+main{max-width:1100px;margin:0 auto;padding:60px 48px 80px}
+.page-intro{margin-bottom:52px}
+.page-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.2;margin-bottom:10px}
+.page-desc{font-size:14px;color:var(--text-secondary);font-weight:300}
+
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s,transform .15s;position:relative;overflow:hidden}
+a.card:hover{border-color:#b0b8d0;box-shadow:0 4px 20px rgba(0,0,0,.07);transform:translateY(-2px)}
+.card.disabled{background:var(--disabled-bg);border-color:var(--disabled-border);pointer-events:none}
+
+.card-thumb{width:100%;height:160px;overflow:hidden;background:#e8e6e0;flex-shrink:0}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+a.card:hover .card-thumb img{transform:scale(1.04)}
+.card.disabled .card-thumb img{filter:grayscale(60%) opacity(.6)}
+.thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.thumb-placeholder svg{width:40px;height:40px;stroke:var(--disabled-text);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+
+.card-body{padding:22px 24px 20px;flex:1;display:flex;flex-direction:column}
+.card-index{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:10px;display:block}
+.card.disabled .card-index{color:var(--disabled-text)}
+.card-title{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.card.disabled .card-title{color:var(--disabled-text)}
+.card-desc{font-size:12.5px;color:var(--text-secondary);font-weight:300;line-height:1.65;flex:1}
+.card.disabled .card-desc{color:var(--disabled-text)}
+
+.card-footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card.disabled .card-footer{border-top-color:var(--disabled-border)}
+.card-link-text{font-size:12px;color:var(--accent);font-weight:500}
+.card.disabled .card-link-text{color:var(--disabled-text)}
+.arrow-icon{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s;flex-shrink:0}
+a.card:hover .arrow-icon{transform:translateX(3px) translateY(-3px)}
+.card.disabled .arrow-icon{stroke:var(--disabled-text)}
+
+.badge-coming{position:absolute;top:12px;right:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--disabled-border);color:var(--text-muted)}
+
+/* ── Power BI 카드 파일 섹션 ── */
+.file-section{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
+.file-section-header{display:flex;align-items:center;margin-bottom:10px}
+.file-section-label{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;display:flex;align-items:center;gap:5px;flex:1}
+.file-section-label svg{width:13px;height:13px;stroke:var(--text-muted);fill:none;stroke-width:1.5}
+.btn-manage{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:transparent;color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:background .15s}
+.btn-manage:hover{background:var(--bg)}
+.btn-manage svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5}
+
+.file-list{display:flex;flex-direction:column;gap:7px}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--bg);border-radius:7px;border:1px solid var(--border);gap:8px}
+.file-item-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.file-icon{width:14px;height:14px;stroke:var(--text-secondary);fill:none;stroke-width:1.5;flex-shrink:0}
+.file-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:11px;color:var(--text-muted);margin-top:1px}
+.btn-dl{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none;flex-shrink:0}
+.btn-dl:hover{background:#1e40af}
+.btn-dl svg{width:11px;height:11px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.no-files{font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center}
+
+/* ── 모달 ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:28px;width:360px;max-width:92vw}
+.modal h2{font-size:15px;font-weight:600;margin-bottom:6px}
+.modal-desc{font-size:12.5px;color:var(--text-secondary);margin-bottom:20px;line-height:1.65}
+.modal label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px}
+.modal input[type=password]{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:var(--surface);color:var(--text-primary);margin-bottom:4px}
+.modal input[type=password]:focus{border-color:var(--accent)}
+.modal input[type=file]{width:100%;padding:7px 0;font-size:12px;font-family:'Noto Sans KR',sans-serif;margin-bottom:4px;display:none}
+.msg{font-size:12px;margin-bottom:10px;min-height:16px}
+.msg.err{color:#dc2626}
+.msg.ok{color:#16a34a}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.btn-cancel{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text-secondary)}
+.btn-cancel:hover{background:var(--bg)}
+.btn-ok{padding:8px 18px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;font-weight:500}
+.btn-ok:hover{background:#1e40af}
+
+@media(max-width:680px){
+  header{padding:0 20px}
+  main{padding:36px 20px 60px}
+  .cards-grid{grid-template-columns:1fr}
+  h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M2 8h12M8 2v12M4 4l8 8M12 4l-8 8" stroke-linecap="round"/></svg>
+    </div>
+    <span class="site-name">기술연구소 업무 포털</span>
+  </div>
+  <span class="header-date" id="today-date"></span>
+</header>
+
+<main>
+  <div class="page-intro">
+    <p class="page-label">R&amp;D Lab Portal</p>
+    <h1>연구소 주요 업무 시스템</h1>
+    <p class="page-desc">카드를 클릭하면 해당 시스템으로 바로 이동합니다.</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- 01 기술연구소 업무 현황 -->
+    <div class="card" id="pb-card">
+      <div class="card-thumb">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=640&q=65&auto=format&fit=crop" alt="업무 현황 대시보드" loading="lazy">
+      </div>
+      <div class="card-body">
+        <span class="card-index">01</span>
+        <div class="card-title">기술연구소 업무 현황</div>
+        <div class="card-desc">Power BI 대시보드를 통해 연구소 업무 진행 상황과 KPI를 실시간으로 확인합니다.</div>
+        <div class="file-section">
+          <div class="file-section-header">
+            <span class="file-section-label">
+              <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+              Power BI 보고서 파일 (.pbix)
+            </span>
+            <button class="btn-manage" onclick="openModal()">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              파일 관리
+            </button>
+          </div>
+          <div class="file-list" id="file-list">
+            <div class="no-files" id="no-msg">업로드된 파일이 없습니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 유관부서 요청 접수 -->
+    <a class="card" href="https://dhkang3.github.io/gst-request-desk/" target="_blank" rel="noopener">
+      <div class="card-thumb">
+        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=640&q=65&auto=format&fit=crop" alt="요청 접수" loading="lazy">
+      </div>
+      <div class="card-body">
+        <span class="card-index">02</span>
+        <div class="card-title">유관부서 요청 접수</div>
+        <div class="card-desc">타 부서로부터의 기술 요청 사항을 접수하고 처리합니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">접수 시스템 열기</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <!-- 03 기구설계 규격 검색 -->
+    <a class="card" href="https://gst-lab1.github.io/gst-lab-info/" target="_blank" rel="noopener">
+      <div class="card-thumb">
+        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=640&q=65&auto=format&fit=crop" alt="기구설계 규격" loading="lazy">
+      </div>
+      <div class="card-body">
+        <span class="card-index">03</span>
+        <div class="card-title">기구설계 규격 검색</div>
+        <div class="card-desc">연구소 기구설계 관련 규격 및 표준 정보를 검색합니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">규격 검색 열기</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <!-- 04 칠러 랩실 관리 -->
+    <div class="card disabled">
+      <span class="badge-coming">준비 중</span>
+      <div class="card-thumb">
+        <div class="thumb-placeholder">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="card-index">04</span>
+        <div class="card-title">칠러 랩실 관리</div>
+        <div class="card-desc">칠러 랩실 운영 현황 및 설비 관리 시스템입니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">URL 미생성</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 스크러버 랩실 관리 -->
+    <div class="card disabled">
+      <span class="badge-coming">준비 중</span>
+      <div class="card-thumb">
+        <div class="thumb-placeholder">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="card-index">05</span>
+        <div class="card-title">스크러버 랩실 관리</div>
+        <div class="card-desc">스크러버 랩실 운영 현황 및 설비 관리 시스템입니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">URL 미생성</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 모달 -->
+<div class="overlay" id="overlay" onclick="bgClose(event)">
+  <div class="modal">
+    <h2>파일 관리</h2>
+    <p class="modal-desc">비밀번호 확인 후 .pbix 파일을 업로드하세요.<br>업로드된 파일은 모든 방문자가 다운로드할 수 있습니다.</p>
+    <label>비밀번호</label>
+    <input type="password" id="pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')step1()">
+    <div class="msg err" id="msg"></div>
+    <input type="file" id="file-input" accept=".pbix,.pdf,.xlsx,.pptx">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">닫기</button>
+      <button class="btn-ok" id="ok-btn" onclick="step1()">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PW = 'tft1234';
+const KEY = 'labportal_v2_files';
+
+/* 날짜 */
+(()=>{
+  const d=new Date();
+  document.getElementById('today-date').textContent=
+    d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+})();
+
+/* 파일 목록 */
+function getFiles(){
+  try{return JSON.parse(localStorage.getItem(KEY))||[];}catch{return[];}
+}
+function saveFiles(arr){localStorage.setItem(KEY,JSON.stringify(arr));}
+
+function renderFiles(){
+  const files=getFiles();
+  const list=document.getElementById('file-list');
+  list.querySelectorAll('.file-item').forEach(el=>el.remove());
+  document.getElementById('no-msg').style.display=files.length?'none':'block';
+  files.forEach(f=>{
+    const div=document.createElement('div');
+    div.className='file-item';
+    div.innerHTML=`
+      <div class="file-item-left">
+        <svg class="file-icon" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <div>
+          <div class="file-name">${f.name}</div>
+          <div class="file-meta">${f.date} 업데이트</div>
+        </div>
+      </div>
+      <a class="btn-dl" href="${f.data}" download="${f.name}">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        다운로드
+      </a>`;
+    list.appendChild(div);
+  });
+}
+renderFiles();
+
+/* 모달 */
+let verified=false;
+function openModal(){
+  verified=false;
+  document.getElementById('pw').value='';
+  document.getElementById('pw').disabled=false;
+  document.getElementById('msg').textContent='';
+  document.getElementById('file-input').style.display='none';
+  document.getElementById('file-input').value='';
+  document.getElementById('ok-btn').textContent='확인';
+  document.getElementById('ok-btn').onclick=step1;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pw').focus(),80);
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function bgClose(e){if(e.target===document.getElementById('overlay'))closeModal();}
+
+function step1(){
+  const val=document.getElementById('pw').value;
+  const msg=document.getElementById('msg');
+  if(val!==PW){msg.textContent='비밀번호가 올바르지 않습니다.';return;}
+  msg.textContent='';
+  verified=true;
+  document.getElementById('pw').disabled=true;
+  document.getElementById('file-input').style.display='block';
+  document.getElementById('ok-btn').textContent='업로드';
+  document.getElementById('ok-btn').onclick=step2;
+}
+
+function step2(){
+  const fi=document.getElementById('file-input');
+  const msg=document.getElementById('msg');
+  if(!fi.files.length){msg.textContent='파일을 선택해주세요.';return;}
+  const file=fi.files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const files=getFiles();
+    const d=new Date();
+    const ds=d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
+    files.unshift({name:file.name,date:ds,data:e.target.result});
+    saveFiles(files);
+    renderFiles();
+    msg.className='msg ok';
+    msg.textContent='✓ 파일이 등록되었습니다.';
+    fi.value='';
+    document.getElementById('ok-btn').textContent='닫기';
+    document.getElementById('ok-btn').onclick=closeModal;
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
