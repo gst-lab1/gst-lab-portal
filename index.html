@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기술연구소 업무 포털</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f3ef;
+  --surface:#ffffff;
+  --border:#e0ddd6;
+  --text-primary:#1a1a18;
+  --text-secondary:#6b6a66;
+  --text-muted:#a09f9b;
+  --accent:#1d4ed8;
+  --disabled-bg:#f0efeb;
+  --disabled-border:#d4d2cc;
+  --disabled-text:#b0aead;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-mark{width:28px;height:28px;background:var(--text-primary);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:16px;height:16px;fill:none;stroke:white;stroke-width:1.5}
+.site-name{font-size:14px;font-weight:500;letter-spacing:-0.01em}
+.header-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+
+main{max-width:1100px;margin:0 auto;padding:60px 48px 80px}
+.page-intro{margin-bottom:52px}
+.page-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.2;margin-bottom:10px}
+.page-desc{font-size:14px;color:var(--text-secondary);font-weight:300}
+
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s,transform .15s;position:relative;overflow:hidden;cursor:pointer}
+.card:hover{border-color:#b0b8d0;box-shadow:0 4px 20px rgba(0,0,0,.07);transform:translateY(-2px)}
+a.card:hover{border-color:#b0b8d0;box-shadow:0 4px 20px rgba(0,0,0,.07);transform:translateY(-2px)}
+.card.disabled{background:var(--disabled-bg);border-color:var(--disabled-border);pointer-events:none;cursor:default}
+
+.card-thumb{width:100%;height:160px;overflow:hidden;flex-shrink:0}
+.thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.thumb-placeholder svg{width:40px;height:40px;stroke:var(--disabled-text);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+
+.card-body{padding:22px 24px 20px;flex:1;display:flex;flex-direction:column}
+.card-index{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:10px;display:block}
+.card.disabled .card-index{color:var(--disabled-text)}
+.card-title{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.card.disabled .card-title{color:var(--disabled-text)}
+.card-desc{font-size:12.5px;color:var(--text-secondary);font-weight:300;line-height:1.65;flex:1}
+.card.disabled .card-desc{color:var(--disabled-text)}
+
+.card-footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card.disabled .card-footer{border-top-color:var(--disabled-border)}
+.card-link-text{font-size:12px;color:var(--accent);font-weight:500}
+.card.disabled .card-link-text{color:var(--disabled-text)}
+.arrow-icon{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s;flex-shrink:0}
+.card:hover .arrow-icon{transform:translateX(3px) translateY(-3px)}
+.card.disabled .arrow-icon{stroke:var(--disabled-text)}
+
+.badge-coming{position:absolute;top:12px;right:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--disabled-border);color:var(--text-muted)}
+.badge-lock{position:absolute;top:12px;right:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.06em;padding:3px 8px;border-radius:4px;background:#fef3c7;color:#92400e;display:flex;align-items:center;gap:4px}
+.badge-lock svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ── 모달 ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:28px;width:360px;max-width:92vw}
+.modal h2{font-size:15px;font-weight:600;margin-bottom:6px}
+.modal-desc{font-size:12.5px;color:var(--text-secondary);margin-bottom:20px;line-height:1.65}
+.modal label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px}
+.modal input[type=password]{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:var(--surface);color:var(--text-primary);margin-bottom:4px}
+.modal input[type=password]:focus{border-color:var(--accent)}
+.msg{font-size:12px;margin-bottom:10px;min-height:16px}
+.msg.err{color:#dc2626}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.btn-cancel{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text-secondary)}
+.btn-cancel:hover{background:var(--bg)}
+.btn-ok{padding:8px 18px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;font-weight:500}
+.btn-ok:hover{background:#1e40af}
+
+/* ── 인증 오버레이 ── */
+#auth-overlay{display:flex;position:fixed;inset:0;background:var(--bg);z-index:999;align-items:center;justify-content:center;font-size:14px;color:var(--text-secondary);gap:8px}
+#auth-overlay .dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:blink 1.2s infinite}
+#auth-overlay .dot:nth-child(2){animation-delay:.2s}
+#auth-overlay .dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+/* ── 헤더 유저 영역 ── */
+.user-info{display:flex;align-items:center;gap:10px}
+.user-name{font-size:13px;color:var(--text-secondary)}
+.btn-logout{padding:5px 13px;background:transparent;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text-secondary)}
+.btn-logout:hover{background:var(--disabled-bg)}
+
+@media(max-width:680px){
+  header{padding:0 20px}
+  main{padding:36px 20px 60px}
+  .cards-grid{grid-template-columns:1fr}
+  h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<div id="auth-overlay"><span>인증 확인 중</span><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M2 8h12M8 2v12M4 4l8 8M12 4l-8 8" stroke-linecap="round"/></svg>
+    </div>
+    <span class="site-name">기술연구소 업무 포털</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span class="header-date" id="today-date"></span>
+    <div class="user-info" id="user-info" style="display:none">
+      <span class="user-name" id="user-name-disp"></span>
+      <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-intro">
+    <p class="page-label">R&amp;D Lab Portal</p>
+    <h1>연구소 주요 업무 시스템</h1>
+    <p class="page-desc">카드를 클릭하면 해당 시스템으로 바로 이동합니다.</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- 01 유관부서 요청 접수 -->
+    <a class="card" href="https://gst-lab1.github.io/gst-request-desk/" target="_blank" rel="noopener">
+      <div class="card-thumb" style="background:#f0f7f2">
+        <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+          <rect width="320" height="160" fill="#f0f7f2"/>
+          <rect x="60" y="28" width="120" height="104" rx="8" fill="white" stroke="#c6dfc9" stroke-width="1.2"/>
+          <line x1="80" y1="60" x2="160" y2="60" stroke="#c6dfc9" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="80" y1="76" x2="155" y2="76" stroke="#c6dfc9" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="80" y1="92" x2="148" y2="92" stroke="#c6dfc9" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="80" y="104" width="50" height="14" rx="4" fill="#3a9e5f"/>
+          <text x="105" y="114" text-anchor="middle" font-size="8.5" fill="white" font-weight="500">접수하기</text>
+          <rect x="78" y="36" width="44" height="16" rx="5" fill="#dcf0e3"/>
+          <text x="100" y="47" text-anchor="middle" font-size="8" fill="#3a9e5f" font-weight="500">요청 접수</text>
+          <line x1="196" y1="80" x2="228" y2="80" stroke="#3a9e5f" stroke-width="2" stroke-linecap="round"/>
+          <polyline points="220,73 228,80 220,87" fill="none" stroke="#3a9e5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="258" cy="62" r="14" fill="#dcf0e3"/>
+          <circle cx="258" cy="58" r="5" fill="#3a9e5f"/>
+          <path d="M247 76 Q258 70 269 76" fill="none" stroke="#3a9e5f" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-index">01</span>
+        <div class="card-title">유관부서 요청 접수</div>
+        <div class="card-desc">타 부서로부터의 기술 요청 사항을 접수하고 처리합니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">접수 시스템 열기</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <!-- 02 기구설계 규격 검색 -->
+    <a class="card" href="https://gst-lab1.github.io/gst-lab-info/" target="_blank" rel="noopener">
+      <div class="card-thumb" style="background:#f5f3ee">
+        <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+          <rect width="320" height="160" fill="#f5f3ee"/>
+          <line x1="40" y1="20" x2="40" y2="140" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="100" y1="20" x2="100" y2="140" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="160" y1="20" x2="160" y2="140" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="220" y1="20" x2="220" y2="140" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="280" y1="20" x2="280" y2="140" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="20" y1="50" x2="300" y2="50" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="20" y1="90" x2="300" y2="90" stroke="#ddd8ce" stroke-width="0.8"/>
+          <line x1="20" y1="130" x2="300" y2="130" stroke="#ddd8ce" stroke-width="0.8"/>
+          <rect x="80" y="38" width="100" height="72" rx="4" fill="none" stroke="#8b7e6a" stroke-width="1.8"/>
+          <circle cx="130" cy="74" r="18" fill="none" stroke="#8b7e6a" stroke-width="1.8"/>
+          <circle cx="130" cy="74" r="5" fill="none" stroke="#8b7e6a" stroke-width="1.2"/>
+          <line x1="80" y1="124" x2="180" y2="124" stroke="#c0733a" stroke-width="1.2" stroke-dasharray="4,2"/>
+          <line x1="80" y1="120" x2="80" y2="128" stroke="#c0733a" stroke-width="1.2"/>
+          <line x1="180" y1="120" x2="180" y2="128" stroke="#c0733a" stroke-width="1.2"/>
+          <text x="130" y="138" text-anchor="middle" font-size="8.5" fill="#c0733a">100 mm</text>
+          <circle cx="252" cy="54" r="20" fill="white" stroke="#8b7e6a" stroke-width="2" opacity=".9"/>
+          <circle cx="248" cy="50" r="10" fill="none" stroke="#4a7fd4" stroke-width="1.8"/>
+          <line x1="256" y1="58" x2="265" y2="67" stroke="#4a7fd4" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-index">02</span>
+        <div class="card-title">기구설계 규격 검색</div>
+        <div class="card-desc">연구소 기구설계 관련 규격 및 표준 정보를 검색합니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">규격 검색 열기</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <!-- 03 칠러 랩실 관리 -->
+    <div class="card disabled">
+      <span class="badge-coming">준비 중</span>
+      <div class="card-thumb" style="background:#ededec">
+        <div class="thumb-placeholder">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="card-index">03</span>
+        <div class="card-title">칠러 랩실 관리</div>
+        <div class="card-desc">칠러 랩실 운영 현황 및 설비 관리 시스템입니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">URL 미생성</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 스크러버 랩실 관리 -->
+    <div class="card disabled">
+      <span class="badge-coming">준비 중</span>
+      <div class="card-thumb" style="background:#ededec">
+        <div class="thumb-placeholder">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="card-index">04</span>
+        <div class="card-title">스크러버 랩실 관리</div>
+        <div class="card-desc">스크러버 랩실 운영 현황 및 설비 관리 시스템입니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">URL 미생성</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 PLM 문서현황 (비밀번호 보호) -->
+    <div class="card" id="plm-card" onclick="openPlmModal()">
+      <span class="badge-lock">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        비밀번호 보호
+      </span>
+      <div class="card-thumb" style="background:#f0eef8">
+        <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+          <rect width="320" height="160" fill="#f0eef8"/>
+          <rect x="40" y="24" width="240" height="112" rx="6" fill="white" stroke="#d4cff0" stroke-width="1.2"/>
+          <rect x="40" y="24" width="240" height="20" rx="6" fill="#e8e4f8"/>
+          <rect x="40" y="34" width="240" height="10" fill="#e8e4f8"/>
+          <line x1="100" y1="24" x2="100" y2="136" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="180" y1="24" x2="180" y2="136" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="240" y1="24" x2="240" y2="136" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="40" y1="64" x2="280" y2="64" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="40" y1="84" x2="280" y2="84" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="40" y1="104" x2="280" y2="104" stroke="#d4cff0" stroke-width="0.8"/>
+          <line x1="40" y1="124" x2="280" y2="124" stroke="#d4cff0" stroke-width="0.8"/>
+          <text x="68" y="37" text-anchor="middle" font-size="7.5" fill="#6b5ec7" font-weight="600">문서번호</text>
+          <text x="138" y="37" text-anchor="middle" font-size="7.5" fill="#6b5ec7" font-weight="600">문서명</text>
+          <text x="208" y="37" text-anchor="middle" font-size="7.5" fill="#6b5ec7" font-weight="600">개정일</text>
+          <text x="258" y="37" text-anchor="middle" font-size="7.5" fill="#6b5ec7" font-weight="600">상태</text>
+          <rect x="246" y="68" width="24" height="10" rx="3" fill="#dcfce7"/>
+          <text x="258" y="76" text-anchor="middle" font-size="6.5" fill="#16a34a">승인</text>
+          <rect x="246" y="88" width="24" height="10" rx="3" fill="#fef9c3"/>
+          <text x="258" y="96" text-anchor="middle" font-size="6.5" fill="#a16207">검토</text>
+          <rect x="246" y="108" width="24" height="10" rx="3" fill="#dcfce7"/>
+          <text x="258" y="116" text-anchor="middle" font-size="6.5" fill="#16a34a">승인</text>
+          <rect x="246" y="128" width="24" height="10" rx="3" fill="#fee2e2"/>
+          <text x="258" y="136" text-anchor="middle" font-size="6.5" fill="#dc2626">반려</text>
+          <rect x="48" y="69" width="40" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="106" y="69" width="62" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="48" y="89" width="40" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="106" y="89" width="55" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="48" y="109" width="40" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="106" y="109" width="68" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="48" y="129" width="40" height="8" rx="2" fill="#e8e4f8"/>
+          <rect x="106" y="129" width="50" height="8" rx="2" fill="#e8e4f8"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-index">05</span>
+        <div class="card-title">PLM 문서현황</div>
+        <div class="card-desc">제품 수명주기 관리(PLM) 문서 현황을 Google Sheets에서 확인합니다.</div>
+        <div class="card-footer">
+          <span class="card-link-text">비밀번호 입력 후 열기</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- PLM 비밀번호 모달 -->
+<div class="overlay" id="plm-overlay" onclick="bgClose(event)">
+  <div class="modal">
+    <h2>🔒 PLM 문서현황</h2>
+    <p class="modal-desc">이 페이지는 권한이 있는 사용자만 열람할 수 있습니다.<br>비밀번호를 입력해주세요.</p>
+    <label>비밀번호</label>
+    <input type="password" id="plm-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkPlmPw()">
+    <div class="msg err" id="plm-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePlmModal()">취소</button>
+      <button class="btn-ok" onclick="checkPlmPw()">열기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ----------------------------------------
+   설정값 (여기만 수정)
+---------------------------------------- */
+var APPS_SCRIPT_URL = 'https://docs.google.com/spreadsheets/d/1ZEbziAa0bA0MB8-IZnzx-n747odOQFartEtSeTFJkZM/edit?usp=sharing';
+var LOGIN_URL        = 'https://gst-lab1.github.io/gst-lab-login/';
+/* -------------------------------------- */
+
+/* 날짜 */
+(function(){
+  var d=new Date();
+  document.getElementById('today-date').textContent=
+    d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+})();
+
+/* 토큰 검증 */
+(async function(){
+  var token = sessionStorage.getItem('portal_token');
+  if(!token){ redirect(); return; }
+  try {
+    var res  = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'verify', token:token })
+    });
+    var data = await res.json();
+    if(!data.ok){ redirect(); return; }
+    showPortal(data.name);
+  } catch(e){
+    var cached = sessionStorage.getItem('portal_user');
+    if(cached){ showPortal(JSON.parse(cached).name); }
+    else { redirect(); }
+  }
+})();
+
+function showPortal(name){
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('user-info').style.display    = 'flex';
+  document.getElementById('user-name-disp').textContent = name + '님';
+}
+function redirect(){
+  sessionStorage.removeItem('portal_token');
+  sessionStorage.removeItem('portal_user');
+  window.location.href = LOGIN_URL;
+}
+function doLogout(){
+  var token = sessionStorage.getItem('portal_token');
+  if(token){
+    fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'logout', token:token })
+    }).catch(function(){});
+  }
+  sessionStorage.removeItem('portal_token');
+  sessionStorage.removeItem('portal_user');
+  window.location.href = LOGIN_URL;
+}
+
+/* PLM 모달 */
+var PLM_PW  = 'tft1234';
+var PLM_URL = 'https://docs.google.com/spreadsheets/d/1pH7MqpmDxb_xV0FvlixmRY0D5o3Q16JtfS3WepR4xOk/edit?gid=948161458#gid=948161458';
+function openPlmModal(){
+  document.getElementById('plm-pw').value='';
+  document.getElementById('plm-msg').textContent='';
+  document.getElementById('plm-overlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('plm-pw').focus(); },80);
+}
+function closePlmModal(){
+  document.getElementById('plm-overlay').classList.remove('open');
+}
+function bgClose(e){
+  if(e.target===document.getElementById('plm-overlay')) closePlmModal();
+}
+function checkPlmPw(){
+  var val=document.getElementById('plm-pw').value;
+  if(val!==PLM_PW){
+    document.getElementById('plm-msg').textContent='비밀번호가 올바르지 않습니다.';
+    document.getElementById('plm-pw').value='';
+    document.getElementById('plm-pw').focus();
+    return;
+  }
+  closePlmModal();
+  window.open(PLM_URL,'_blank','noopener');
+}
+</script>
+</body>
+</html>
