@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기술연구소 업무 포털 — 로그인</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f3ef;
+  --surface:#ffffff;
+  --border:#e0ddd6;
+  --text-primary:#1a1a18;
+  --text-secondary:#6b6a66;
+  --text-muted:#a09f9b;
+  --accent:#1d4ed8;
+  --danger:#dc2626;
+  --success:#16a34a;
+  --disabled-bg:#f0efeb;
+  --disabled-border:#d4d2cc;
+  --disabled-text:#b0aead;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-mark{width:28px;height:28px;background:var(--text-primary);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:16px;height:16px;fill:none;stroke:white;stroke-width:1.5}
+.site-name{font-size:14px;font-weight:500;letter-spacing:-0.01em}
+.header-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.login-wrap{width:100%;max-width:420px}
+.login-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.login-title{font-size:24px;font-weight:600;letter-spacing:-.03em;margin-bottom:6px}
+.login-desc{font-size:13px;color:var(--text-secondary);font-weight:300;margin-bottom:28px;line-height:1.65}
+
+/* 탭 */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;gap:0}
+.tab-btn{flex:1;padding:10px 0;background:transparent;border:none;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;font-weight:400}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-btn:hover:not(.active){color:var(--text-secondary)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 28px 24px}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:5px;font-weight:500;letter-spacing:.02em}
+.field input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;background:var(--surface);color:var(--text-primary);transition:border-color .15s}
+.field input:focus{border-color:var(--accent)}
+.field input.error{border-color:var(--danger)}
+.field-hint{font-size:11px;color:var(--text-muted);margin-top:4px;line-height:1.5}
+
+.msg{font-size:12px;min-height:18px;margin-bottom:10px;line-height:1.5}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--success)}
+
+.btn-submit{width:100%;padding:11px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;font-weight:500;letter-spacing:-.01em;transition:background .15s,opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:hover{background:#1e40af}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none;flex-shrink:0}
+.btn-submit.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pw-rule{font-size:11px;color:var(--text-muted);background:var(--disabled-bg);border-radius:7px;padding:8px 12px;margin-bottom:14px;line-height:1.7}
+.pw-rule b{color:var(--text-secondary);font-weight:500}
+
+.login-footer{margin-top:20px;text-align:center}
+.security-badge{display:inline-flex;align-items:center;gap:5px;background:var(--disabled-bg);padding:4px 10px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--text-muted)}
+.security-badge svg{width:11px;height:11px;stroke:var(--text-muted);fill:none;stroke-width:1.8}
+
+footer{padding:20px 48px;text-align:center;font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+
+@media(max-width:480px){
+  header{padding:0 20px}
+  .login-card{padding:22px 18px 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M2 8h12M8 2v12M4 4l8 8M12 4l-8 8" stroke-linecap="round"/></svg>
+    </div>
+    <span class="site-name">기술연구소 업무 포털</span>
+  </div>
+  <span class="header-date" id="today-date"></span>
+</header>
+
+<main>
+  <div class="login-wrap">
+    <p class="login-label">R&amp;D Lab Portal</p>
+    <h1 class="login-title">로그인</h1>
+    <p class="login-desc">포털 이용을 위해 회사 아이디로 접속하세요.<br>최초 접속 시 비밀번호를 직접 설정할 수 있습니다.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">로그인</button>
+      <button class="tab-btn" onclick="switchTab('register')">최초 비밀번호 설정</button>
+    </div>
+
+    <!-- 로그인 탭 -->
+    <div class="tab-panel active" id="tab-login">
+      <div class="login-card">
+        <div class="field">
+          <label for="l-uid">회사 아이디</label>
+          <input type="text" id="l-uid" placeholder="아이디 입력" autocomplete="username"
+            onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+        </div>
+        <div class="field">
+          <label for="l-pw">비밀번호</label>
+          <input type="password" id="l-pw" placeholder="비밀번호 입력" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')submitLogin()">
+        </div>
+        <div class="msg err" id="l-msg"></div>
+        <button class="btn-submit" id="l-btn" onclick="submitLogin()">
+          <div class="spinner"></div>
+          <span>로그인</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 최초 비밀번호 설정 탭 -->
+    <div class="tab-panel" id="tab-register">
+      <div class="login-card">
+        <div class="pw-rule">
+          <b>비밀번호 규칙</b><br>
+          8자 이상 / 영문 + 숫자 조합 필수
+        </div>
+        <div class="field">
+          <label for="r-uid">회사 아이디</label>
+          <input type="text" id="r-uid" placeholder="관리자에게 부여받은 아이디"
+            onkeydown="if(event.key==='Enter')document.getElementById('r-pw').focus()">
+          <div class="field-hint">이미 비밀번호가 설정된 계정은 변경 불가합니다</div>
+        </div>
+        <div class="field">
+          <label for="r-pw">비밀번호</label>
+          <input type="password" id="r-pw" placeholder="8자 이상, 영문+숫자"
+            onkeydown="if(event.key==='Enter')document.getElementById('r-pw2').focus()">
+        </div>
+        <div class="field">
+          <label for="r-pw2">비밀번호 확인</label>
+          <input type="password" id="r-pw2" placeholder="비밀번호 재입력"
+            onkeydown="if(event.key==='Enter')submitRegister()">
+        </div>
+        <div class="msg" id="r-msg"></div>
+        <button class="btn-submit" id="r-btn" onclick="submitRegister()">
+          <div class="spinner"></div>
+          <span>비밀번호 설정 완료</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      <span class="security-badge">
+        <svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+        TOKEN-SECURED ACCESS
+      </span>
+    </div>
+  </div>
+</main>
+
+<footer>GIST R&amp;D LAB &nbsp;·&nbsp; INTERNAL USE ONLY</footer>
+
+<script>
+/* ----------------------------------------
+   설정값 (여기만 수정)
+---------------------------------------- */
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4WvSSrC07Uu-a3qMAyAoH4t-rnM0xZG54zjGynQuJKTz50g2jh72Z16zY5bimgNfe/exec';
+var PORTAL_URL = 'https://gst-lab1.github.io/gst-lab-portal/';
+/* -------------------------------------- */
+
+(function(){
+  var d = new Date();
+  document.getElementById('today-date').textContent =
+    d.getFullYear() + '.' +
+    String(d.getMonth()+1).padStart(2,'0') + '.' +
+    String(d.getDate()).padStart(2,'0');
+})();
+
+// 이미 토큰 있으면 바로 포털로
+(function(){
+  if(sessionStorage.getItem('portal_token')) window.location.href = PORTAL_URL;
+})();
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active', (tab==='login' && i===0)||(tab==='register' && i===1));
+  });
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  clearMsgs();
+}
+
+function clearMsgs(){
+  ['l-msg','r-msg'].forEach(function(id){ document.getElementById(id).textContent=''; });
+  document.querySelectorAll('input').forEach(function(el){ el.classList.remove('error'); });
+}
+
+/* ---- 로그인 ---- */
+async function submitLogin(){
+  var uid   = document.getElementById('l-uid').value.trim();
+  var pw    = document.getElementById('l-pw').value;
+  var msgEl = document.getElementById('l-msg');
+  var btn   = document.getElementById('l-btn');
+  msgEl.textContent = '';
+  msgEl.className   = 'msg err';
+
+  if(!uid){ msgEl.textContent='아이디를 입력해주세요.'; document.getElementById('l-uid').focus(); return; }
+  if(!pw) { msgEl.textContent='비밀번호를 입력해주세요.'; document.getElementById('l-pw').focus(); return; }
+
+  setLoading(btn, true);
+  try {
+    var res  = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ action:'login', uid:uid, pw:pw })
+    });
+    var data = await res.json();
+    if(data.ok){
+      sessionStorage.setItem('portal_token', data.token);
+      sessionStorage.setItem('portal_user', JSON.stringify({ uid:data.uid, name:data.name, role:data.role, dept:data.dept }));
+      msgEl.className = 'msg ok';
+      msgEl.textContent = data.name + '님, 환영합니다! 이동 중...';
+      setTimeout(function(){ window.location.href = PORTAL_URL; }, 700);
+    } else {
+      msgEl.textContent = data.msg || '아이디 또는 비밀번호를 확인해주세요.';
+      document.getElementById('l-pw').value = '';
+      document.getElementById('l-pw').focus();
+    }
+  } catch(e){
+    msgEl.textContent = '서버 연결 오류. 잠시 후 다시 시도해주세요.';
+  }
+  setLoading(btn, false);
+}
+
+/* ---- 최초 비밀번호 설정 ---- */
+async function submitRegister(){
+  var uid   = document.getElementById('r-uid').value.trim();
+  var pw    = document.getElementById('r-pw').value;
+  var pw2   = document.getElementById('r-pw2').value;
+  var msgEl = document.getElementById('r-msg');
+  var btn   = document.getElementById('r-btn');
+  msgEl.textContent = '';
+  msgEl.className   = 'msg';
+
+  if(!uid)  { msgEl.className='msg err'; msgEl.textContent='회사 아이디를 입력해주세요.'; return; }
+  if(!pw)   { msgEl.className='msg err'; msgEl.textContent='비밀번호를 입력해주세요.'; return; }
+  if(pw.length < 8){ msgEl.className='msg err'; msgEl.textContent='비밀번호는 8자 이상이어야 합니다.'; return; }
+  if(!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw)){
+    msgEl.className='msg err'; msgEl.textContent='영문과 숫자를 모두 포함해야 합니다.'; return;
+  }
+  if(pw !== pw2){ msgEl.className='msg err'; msgEl.textContent='비밀번호가 일치하지 않습니다.'; document.getElementById('r-pw2').focus(); return; }
+
+  setLoading(btn, true);
+  try {
+    var res  = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ action:'register', uid:uid, pw:pw })
+    });
+    var data = await res.json();
+    if(data.ok){
+      msgEl.className = 'msg ok';
+      msgEl.textContent = '비밀번호 설정 완료! 로그인 탭에서 로그인하세요.';
+      document.getElementById('r-uid').value='';
+      document.getElementById('r-pw').value='';
+      document.getElementById('r-pw2').value='';
+      setTimeout(function(){ switchTab('login'); }, 1800);
+    } else {
+      msgEl.className = 'msg err';
+      msgEl.textContent = data.msg || '설정 중 오류가 발생했습니다.';
+    }
+  } catch(e){
+    msgEl.className = 'msg err';
+    msgEl.textContent = '서버 연결 오류. 잠시 후 다시 시도해주세요.';
+  }
+  setLoading(btn, false);
+}
+
+function setLoading(btn, on){
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+</script>
+</body>
+</html>
